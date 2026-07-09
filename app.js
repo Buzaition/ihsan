@@ -16,6 +16,7 @@ const STORAGE = {
   favorites: "zikra_favorites",
   khatmah: "zikra_khatmah",
   lastRead: "zikra_last_read",
+  currentReader: "ihsan_current_reader",
   font: "zikra_font_size",
   reciter: "zikra_reciter",
   readerMode: "zikra_reader_mode",
@@ -84,6 +85,33 @@ async function init() {
   await Promise.all([loadSurahs(), loadAzkar()]);
   hydrateKhatmahSelect();
   renderHomeState();
+  await restoreReaderAfterRefresh();
+}
+
+function openMobileMenu() {
+  const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+  document.body.dataset.menuScrollY = String(scrollY);
+  document.body.classList.add("mobile-menu-open");
+  const btn = $("#mobileMenuBtn");
+  if (btn) btn.setAttribute("aria-expanded", "true");
+  requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
+}
+
+function closeMobileMenu(preserveScroll = true) {
+  const scrollY = Number(document.body.dataset.menuScrollY || window.scrollY || 0);
+  document.body.classList.remove("mobile-menu-open");
+  const btn = $("#mobileMenuBtn");
+  if (btn) btn.setAttribute("aria-expanded", "false");
+  if (preserveScroll) requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
+}
+
+function toggleMobileMenu(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  if (document.body.classList.contains("mobile-menu-open")) closeMobileMenu();
+  else openMobileMenu();
 }
 
 function bindEvents() {
@@ -91,7 +119,9 @@ function bindEvents() {
     const routeTarget = event.target.closest("[data-route]");
     if (routeTarget) {
       event.preventDefault();
-      navigate(routeTarget.dataset.route);
+      const route = routeTarget.dataset.route;
+      closeMobileMenu(false);
+      navigate(route);
     }
 
     const surahTarget = event.target.closest("[data-surah]");
@@ -101,7 +131,12 @@ function bindEvents() {
     if (categoryTarget) selectAzkarCategory(categoryTarget.dataset.azkarCategory);
 
     const favTarget = event.target.closest("[data-fav]");
-    if (favTarget) toggleFavorite(JSON.parse(decodeURIComponent(favTarget.dataset.fav)));
+    if (favTarget) {
+      const favItem = JSON.parse(decodeURIComponent(favTarget.dataset.fav));
+      const isActive = toggleFavorite(favItem);
+      favTarget.classList.toggle("is-active", isActive);
+      favTarget.setAttribute("aria-pressed", String(isActive));
+    }
 
     const copyTarget = event.target.closest("[data-copy]");
     if (copyTarget) copyText(decodeURIComponent(copyTarget.dataset.copy));
@@ -128,6 +163,18 @@ function bindEvents() {
     if (readerAction) {
       if (readerAction.dataset.readerAction === "previous") openPreviousSurah();
       if (readerAction.dataset.readerAction === "next") openNextSurah();
+    }
+
+    const fontAction = event.target.closest("[data-font-delta]");
+    if (fontAction) {
+      event.preventDefault();
+      changeFont(Number(fontAction.dataset.fontDelta || 0));
+    }
+
+    const fullscreenAction = event.target.closest("[data-toggle-fullscreen]");
+    if (fullscreenAction) {
+      event.preventDefault();
+      toggleFullscreen();
     }
 
     const exitFullscreenAction = event.target.closest("[data-exit-fullscreen]");
@@ -162,6 +209,22 @@ function bindEvents() {
   if (readerNode) readerNode.addEventListener("scroll", scheduleAutoSaveLastRead, { passive: true });
 
   $("#themeToggle").addEventListener("click", toggleTheme);
+  const mobileMenuBtn = $("#mobileMenuBtn");
+  if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", (event) => toggleMobileMenu(event));
+  const mobileMenuOverlay = $("#mobileMenuOverlay");
+  if (mobileMenuOverlay) mobileMenuOverlay.addEventListener("click", () => closeMobileMenu(true));
+  $$("#topNav a[data-route]").forEach(link => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const route = link.dataset.route;
+      closeMobileMenu(false);
+      navigate(route);
+    });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMobileMenu();
+  });
   $("#surahFilter").addEventListener("input", renderSurahs);
   $("#surahTypeFilter").addEventListener("change", renderSurahs);
   $("#azkarFilter").addEventListener("input", () => renderAzkarCategories());
@@ -201,16 +264,22 @@ function bindEvents() {
     state.searchScope = btn.dataset.searchScope;
     if ($("#globalSearch").value.trim()) runGlobalSearch();
   }));
-  $("#fontPlus").addEventListener("click", () => changeFont(.12));
-  $("#fontMinus").addEventListener("click", () => changeFont(-.12));
-  $("#saveLastRead").addEventListener("click", () => saveCurrentRead(false));
+  const fontPlusBtn = $("#fontPlus");
+  if (fontPlusBtn) fontPlusBtn.addEventListener("click", () => changeFont(.12));
+  const fontMinusBtn = $("#fontMinus");
+  if (fontMinusBtn) fontMinusBtn.addEventListener("click", () => changeFont(-.12));
+  const saveLastReadBtn = $("#saveLastRead");
+  if (saveLastReadBtn) saveLastReadBtn.addEventListener("click", () => saveCurrentRead(false));
   $("#prevSurahBtn").addEventListener("click", openPreviousSurah);
   $("#nextSurahBtn").addEventListener("click", openNextSurah);
   const stopAudioBtn = $("#stopAudioBtn");
   if (stopAudioBtn) stopAudioBtn.addEventListener("click", () => { stopActiveAudio(); toast("تم إيقاف الصوت"); });
-  $("#readerModeToggle").addEventListener("click", toggleReaderMode);
-  $("#fullscreenBtn").addEventListener("click", toggleFullscreen);
-  $("#reciterSelect").addEventListener("change", handleReciterChange);
+  const readerModeToggleBtn = $("#readerModeToggle");
+  if (readerModeToggleBtn) readerModeToggleBtn.addEventListener("click", toggleReaderMode);
+  const fullscreenBtn = $("#fullscreenBtn");
+  if (fullscreenBtn) fullscreenBtn.addEventListener("click", toggleFullscreen);
+  const reciterSelectEl = $("#reciterSelect");
+  if (reciterSelectEl) reciterSelectEl.addEventListener("change", handleReciterChange);
   $("#favoriteTypeFilter").addEventListener("change", renderFavorites);
   $("#clearFavorites").addEventListener("click", clearFavorites);
   $("#khatmahForm").addEventListener("submit", saveKhatmah);
@@ -227,7 +296,10 @@ function bindEvents() {
 
 function navigate(route, updateHash = true) {
   const safeRoute = $("#" + route) ? route : "home";
+  const previousRoute = state.route;
   state.route = safeRoute;
+  document.body.dataset.route = safeRoute;
+  document.body.classList.toggle("is-home", safeRoute === "home");
   $$(".view").forEach(view => view.classList.remove("active-view"));
   $("#" + safeRoute).classList.add("active-view");
   $$(".top-nav a").forEach(link => link.classList.toggle("active", link.dataset.route === safeRoute));
@@ -235,11 +307,36 @@ function navigate(route, updateHash = true) {
   if (safeRoute === "favorites") renderFavorites();
   if (safeRoute === "tasbeeh") renderTasbeeh();
   if (safeRoute === "prayer") loadPrayerTimes(false, false);
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (safeRoute !== previousRoute) window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function restoreReaderAfterRefresh() {
+  const route = (location.hash || "").replace("#", "") || state.route;
+  if (route !== "reader" || state.currentSurah) return Promise.resolve();
+  const saved = readJSON(STORAGE.currentReader, null) || readJSON(STORAGE.lastRead, null);
+  if (saved?.surah) {
+    return openSurah(Number(saved.surah), Number(saved.ayah || 1));
+  }
+  const fallbackSurah = Number(localStorage.getItem("ihsan_last_surah_number") || 0);
+  if (fallbackSurah) return openSurah(fallbackSurah, 1);
+  navigate("quran");
+  return Promise.resolve();
+}
+
+function rememberCurrentReader(surahNumber, ayahNumber = 1) {
+  const surahInfo = state.surahs.find(s => Number(s.number) === Number(surahNumber));
+  const read = {
+    surah: Number(surahNumber),
+    name: surahInfo?.name || state.currentSurah?.name || "",
+    ayah: Number(ayahNumber || 1),
+    date: new Date().toISOString()
+  };
+  localStorage.setItem(STORAGE.currentReader, JSON.stringify(read));
+  localStorage.setItem("ihsan_last_surah_number", String(read.surah));
 }
 
 function startReadingFromHome() {
-  const last = readJSON(STORAGE.lastRead, null);
+  const last = readJSON(STORAGE.currentReader, null) || readJSON(STORAGE.lastRead, null);
   if (last?.surah) {
     openSurah(Number(last.surah), Number(last.ayah || 1));
     return;
@@ -302,6 +399,7 @@ function renderSurahs() {
 
 async function openSurah(number, targetAyah = null) {
   navigate("reader");
+  rememberCurrentReader(number, targetAyah || 1);
   stopActiveAudio();
   $("#surahTitle").textContent = "جاري تحميل السورة...";
   $("#readerHint").textContent = "يتم تجهيز القراءة والتفسير والصوت.";
@@ -315,10 +413,15 @@ async function openSurah(number, targetAyah = null) {
     state.currentSurah = surahRes.value?.data;
     state.currentTafsir = tafsirRes.value?.data;
     state.currentAudio = audioRes.value?.data;
+    if (!state.currentSurah?.ayahs?.length) {
+      throw new Error("Surah data is empty");
+    }
     renderReader();
     if (targetAyah) scrollToAyah(targetAyah);
   } catch (error) {
-    $("#ayahList").innerHTML = `<div class="status-note">حدث خطأ أثناء تحميل السورة.</div>`;
+    $("#surahTitle").textContent = "تعذر تحميل السورة";
+    $("#readerHint").textContent = "لم نستطع تحميل السورة الآن. جرّب تحديث الصفحة أو التأكد من الاتصال بالإنترنت.";
+    $("#ayahList").innerHTML = `<div class="status-note">حدث خطأ أثناء تحميل السورة. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.</div>`;
   }
 }
 
@@ -346,12 +449,14 @@ function renderReaderNav() {
   const nextBtn = $("#nextSurahBtn");
   prevBtn.disabled = !prev;
   nextBtn.disabled = !next;
-  prevBtn.textContent = prev ? `السابق: ${prev.name}` : "لا يوجد سابق";
-  nextBtn.textContent = next ? `التالي: ${next.name}` : "لا يوجد تالي";
+  prevBtn.textContent = prev ? `‹ ${prev.name}` : "‹";
+  nextBtn.textContent = next ? `${next.name} ›` : "›";
+  prevBtn.title = prev ? `السورة السابقة: ${prev.name}` : "لا توجد سورة سابقة";
+  nextBtn.title = next ? `السورة التالية: ${next.name}` : "لا توجد سورة تالية";
 }
 
 function renderReaderHint() {
-  const mode = state.readerMode === "continuous" ? "قراءة متصلة: السورة ظاهرة كنص واحد كامل." : "قراءة آية آية: كل آية في بطاقة منفصلة مع التفسير والصوت.";
+  const mode = state.readerMode === "continuous" ? "قراءة متصلة: السورة ظاهرة كنص واحد كامل." : "قراءة بالآية: كل آية في بطاقة منفصلة مع التفسير والصوت.";
   const reciter = RECITERS.find(r => r.id === state.reciter)?.name || "القارئ الحالي";
   $("#readerHint").innerHTML = `<strong>${mode}</strong><span>القارئ: ${reciter}</span>`;
 }
@@ -365,7 +470,10 @@ function renderAyahCards() {
     const tafsir = tafsirAyahs[index]?.text || "التفسير غير متاح حاليًا لهذه الآية.";
     const audio = audioAyahs[index]?.audio || "";
     const displayText = getAyahDisplayText(ayah, surah);
-    const fav = encodeURIComponent(JSON.stringify({ type: "ayah", title: `${surah.name} ${ayah.numberInSurah}`, text: displayText, meta: `سورة ${surah.name} - آية ${ayah.numberInSurah}`, surah: surah.number, ayah: ayah.numberInSurah }));
+    const favObj = { type: "ayah", title: `${surah.name} ${ayah.numberInSurah}`, text: displayText, meta: `سورة ${surah.name} - آية ${ayah.numberInSurah}`, surah: surah.number, ayah: ayah.numberInSurah };
+    favObj.key = favoriteKey(favObj);
+    const fav = encodeURIComponent(JSON.stringify(favObj));
+    const favActive = isFavorite(favObj);
     const text = encodeURIComponent(`${displayText}\nسورة ${surah.name} - آية ${ayah.numberInSurah}`);
     return `
       <article class="ayah-card" id="ayah-${ayah.numberInSurah}" data-ayah-number="${ayah.numberInSurah}">
@@ -379,7 +487,7 @@ function renderAyahCards() {
           <button class="tool-btn" data-tafsir="${ayah.numberInSurah}">التفسير</button>
           <button class="tool-btn" data-copy="${text}">نسخ</button>
           <button class="tool-btn" data-share="${text}">مشاركة</button>
-          <button class="tool-btn" data-fav="${fav}">حفظ</button>
+          <button class="tool-btn heart-btn ${favActive ? "is-active" : ""}" data-fav="${fav}" type="button" aria-label="حفظ الآية في المفضلة" aria-pressed="${favActive}">♥</button>
         </div>
         <div class="tafsir" id="tafsir-${ayah.numberInSurah}">${tafsir}</div>
       </article>
@@ -408,7 +516,10 @@ function renderContinuousReader() {
   }).join(" ");
   const basmalahForText = shouldShowStandaloneBasmalah(surah) ? `${BASMALAH_TEXT}\n\n` : "";
   const fullText = `${surah.name}\n\n${basmalahForText}${surah.ayahs.map(ayah => `${getAyahDisplayText(ayah, surah)} ۝${toArabicDigits(ayah.numberInSurah)}`).join(" ")}`;
-  const fav = encodeURIComponent(JSON.stringify({ type: "ayah", title: `سورة ${surah.name} كاملة`, text: `${basmalahForText}${surah.ayahs.map(a => getAyahDisplayText(a, surah)).join(" ")}`.trim(), meta: `سورة ${surah.name} كاملة`, surah: surah.number, ayah: 1 }));
+  const favObj = { type: "ayah", title: `سورة ${surah.name} كاملة`, text: `${basmalahForText}${surah.ayahs.map(a => getAyahDisplayText(a, surah)).join(" ")}`.trim(), meta: `سورة ${surah.name} كاملة`, surah: surah.number, ayah: 1 };
+  favObj.key = favoriteKey(favObj);
+  const fav = encodeURIComponent(JSON.stringify(favObj));
+  const favActive = isFavorite(favObj);
   const revelationLabel = surah.revelationType === "Meccan" ? "مكية" : "مدنية";
 
   $("#ayahList").className = "ayah-list continuous-mode";
@@ -416,17 +527,23 @@ function renderContinuousReader() {
     <article class="continuous-card glass-card">
       <button class="fullscreen-exit-chip fullscreen-only" data-exit-fullscreen type="button" aria-label="الخروج من وضع الشاشة الكاملة">×</button>
       <div class="continuous-toolbar">
+        <button class="tool-btn" type="button" data-reader-action="previous" ${surah.number > 1 ? "" : "disabled"}>‹ السابق</button>
         <div class="continuous-surah-head">
           <strong>${surah.name}</strong>
           <small>${revelationLabel} • ${toArabicDigits(surah.ayahs.length)} آية</small>
         </div>
+        <button class="tool-btn" type="button" data-reader-action="next" ${surah.number < 114 ? "" : "disabled"}>التالي ›</button>
+        <span class="reciter-chip">${RECITERS.find(r => r.id === state.reciter)?.name || "القارئ"}</span>
         <span class="audio-control-group continuous-audio-controls">
           <button class="tool-btn icon-only-btn" onclick="playSurahAudio()" title="تشغيل السورة" aria-label="تشغيل السورة">▶</button>
           <button class="tool-btn icon-only-btn" data-stop-audio type="button" title="إيقاف الصوت" aria-label="إيقاف الصوت">■</button>
         </span>
-        <button class="tool-btn" data-copy="${encodeURIComponent(fullText)}">نسخ السورة</button>
+        <button class="tool-btn icon-btn" type="button" data-font-delta="-0.12" title="تصغير الخط" aria-label="تصغير الخط">A-</button>
+        <button class="tool-btn icon-btn" type="button" data-font-delta="0.12" title="تكبير الخط" aria-label="تكبير الخط">A+</button>
+        <button class="tool-btn icon-only-btn" type="button" data-toggle-fullscreen title="ملء الشاشة" aria-label="ملء الشاشة">⛶</button>
+        <button class="tool-btn" data-copy="${encodeURIComponent(fullText)}">نسخ</button>
         <button class="tool-btn" data-share="${encodeURIComponent(fullText)}">مشاركة</button>
-        <button class="tool-btn" data-fav="${fav}">حفظ السورة</button>
+        <button class="tool-btn heart-btn ${favActive ? "is-active" : ""}" data-fav="${fav}" type="button" aria-label="حفظ السورة في المفضلة" aria-pressed="${favActive}">♥</button>
       </div>
       ${renderStandaloneBasmalah(surah, "continuous-basmalah")}
       <div class="surah-continuous-text">${allText}</div>
@@ -445,6 +562,7 @@ function renderBottomReaderNav(extraClass = "") {
       <button class="ghost-btn" type="button" data-reader-action="previous" ${prev ? "" : "disabled"}>${prev ? `السورة السابقة: ${prev.name}` : "لا يوجد سابق"}</button>
       <span class="reader-end-note">نهاية سورة ${state.currentSurah.name}</span>
       <button class="primary-btn" type="button" data-reader-action="next" ${next ? "" : "disabled"}>${next ? `السورة التالية: ${next.name}` : "لا يوجد تالي"}</button>
+
     </nav>
   `;
 }
@@ -482,7 +600,7 @@ function toggleReaderMode() {
 
 function updateReaderModeButton() {
   const btn = $("#readerModeToggle");
-  btn.textContent = state.readerMode === "continuous" ? "بطاقات الآيات" : "قراءة متصلة";
+  btn.textContent = state.readerMode === "continuous" ? "قراءة بالآية" : "قراءة متصلة";
 }
 
 function toggleFullscreen() {
@@ -502,7 +620,10 @@ function toggleFullscreen() {
 function updateFullscreenButton() {
   const btn = $("#fullscreenBtn");
   if (!btn) return;
-  btn.textContent = document.fullscreenElement ? "⤢ إغلاق الشاشة الكاملة" : "⛶ شاشة كاملة";
+  const isFull = Boolean(document.fullscreenElement);
+  btn.textContent = isFull ? "⤢" : "⛶";
+  btn.title = isFull ? "إغلاق الشاشة الكاملة" : "ملء الشاشة";
+  btn.setAttribute("aria-label", btn.title);
 }
 
 function populateReciters() {
@@ -712,8 +833,17 @@ function searchAzkar(query) {
     `);
 }
 
+function favoriteKey(item) {
+  return item.key || `${item.type}-${item.title}-${item.meta}`;
+}
+
+function isFavorite(item) {
+  const key = favoriteKey(item);
+  return state.favorites.some(f => f.key === key);
+}
+
 function toggleFavorite(item) {
-  const key = item.key || `${item.type}-${item.title}-${item.meta}`;
+  const key = favoriteKey(item);
   const exists = state.favorites.some(f => f.key === key);
   if (exists) {
     state.favorites = state.favorites.filter(f => f.key !== key);
@@ -723,6 +853,7 @@ function toggleFavorite(item) {
     toast("تم الحفظ في المفضلة");
   }
   persistFavorites();
+  return !exists;
 }
 
 function persistFavorites() {
@@ -793,6 +924,7 @@ function saveCurrentRead(silent = false) {
   const ayah = getCurrentVisibleAyah();
   const read = { surah: state.currentSurah.number, name: state.currentSurah.name, ayah, date: new Date().toISOString() };
   localStorage.setItem(STORAGE.lastRead, JSON.stringify(read));
+  localStorage.setItem(STORAGE.currentReader, JSON.stringify(read));
   renderHomeState();
   if (!silent) toast(`تم حفظ الموضع: ${state.currentSurah.name} آية ${toArabicDigits(ayah)}`);
 }
@@ -1096,8 +1228,11 @@ function saveTasbeehToFavorites() {
 
 
 function renderHomeState() {
-  const last = readJSON(STORAGE.lastRead, null);
-  $("#lastReadMini").textContent = last ? `${last.name} - آية ${toArabicDigits(last.ayah)}` : "لم تبدأ بعد";
+  const last = readJSON(STORAGE.lastRead, null) || readJSON(STORAGE.currentReader, null);
+  const lastReadNode = $("#lastReadMini");
+  if (lastReadNode) {
+    lastReadNode.textContent = last ? `${last.name || "سورة"} - آية ${toArabicDigits(last.ayah || 1)}` : "لم تبدأ بعد";
+  }
   updateMiniStats();
 }
 

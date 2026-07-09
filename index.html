@@ -14,7 +14,10 @@
   <meta name="theme-color" content="#0c7a55" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body class="is-home">
+  <script>
+    if ((location.hash || "#home").replace("#", "") !== "home") document.body.classList.remove("is-home");
+  </script>
   <div class="background-pattern" aria-hidden="true"></div>
 
   <header class="app-header">
@@ -26,7 +29,13 @@
       </span>
     </a>
 
-    <nav class="top-nav" aria-label="التنقل الرئيسي">
+    <button class="menu-toggle" id="mobileMenuBtn" type="button" aria-label="فتح القائمة" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="top-nav" id="topNav" aria-label="التنقل الرئيسي">
       <a href="#home" data-route="home" class="active">الرئيسية</a>
       <a href="#quran" data-route="quran">القرآن</a>
       <a href="#azkar" data-route="azkar">الأذكار</a>
@@ -42,6 +51,7 @@
       <span>☾</span>
     </button>
   </header>
+  <button class="mobile-menu-overlay" id="mobileMenuOverlay" type="button" aria-label="إغلاق القائمة"></button>
 
   <main>
     <section id="home" class="view active-view">
@@ -59,12 +69,7 @@
             <button class="ghost-btn" id="homeDailyAzkarBtn" type="button">أذكار اليوم</button>
           </div>
         </div>
-        <div class="hero-ornament" aria-hidden="true">
-          <div class="ornament-circle"><span>ٱقرأ</span></div>
-          <div class="floating-card top">آخر قراءة <strong id="lastReadMini">لم تبدأ بعد</strong></div>
-          <div class="floating-card bottom">المفضلة <strong id="favCountMini">0 عناصر</strong></div>
         </div>
-      </div>
 
       <div class="quick-search glass-card">
         <label for="homeSearch">ابحث بسرعة</label>
@@ -128,20 +133,16 @@
 
     <section id="reader" class="view reader-view">
       <div class="reader-toolbar glass-card">
-        <button class="ghost-btn" data-route="quran">← رجوع للفهرس</button>
+        <button class="ghost-btn back-to-index" data-route="quran" type="button" aria-label="الرجوع إلى فهرس السور">←</button>
         <div class="reader-title-block">
           <p class="eyebrow" id="surahMeta">السورة</p>
           <h2 id="surahTitle">جاري التحميل...</h2>
         </div>
-        <div class="reader-actions">
-          <button id="prevSurahBtn" class="ghost-btn compact-btn" type="button">السورة السابقة</button>
-          <button id="nextSurahBtn" class="ghost-btn compact-btn" type="button">السورة التالية</button>
+        <div class="reader-nav-row" aria-label="أدوات السورة والقراءة">
+          <button id="prevSurahBtn" class="ghost-btn compact-btn nav-surah-btn" type="button">السورة السابقة</button>
           <select id="reciterSelect" class="compact-select" aria-label="اختيار القارئ"></select>
+          <button id="nextSurahBtn" class="ghost-btn compact-btn nav-surah-btn" type="button">السورة التالية</button>
           <button id="readerModeToggle" class="ghost-btn compact-btn" type="button">قراءة متصلة</button>
-          <button id="fullscreenBtn" class="ghost-btn compact-btn" type="button">⛶ شاشة كاملة</button>
-          <button id="fontMinus" class="icon-btn" title="تصغير الخط">A-</button>
-          <button id="fontPlus" class="icon-btn" title="تكبير الخط">A+</button>
-          <button id="saveLastRead" class="primary-btn compact-btn">حفظ الموضع</button>
         </div>
       </div>
       <div id="readerHint" class="reader-hint glass-card"></div>
