@@ -1,0 +1,15 @@
+{
+  "name": "إحسان - القرآن الكريم والأذكار",
+  "short_name": "إحسان",
+  "description": "موقع للقرآن الكريم والأذكار ومتابعة الختمة، إهداء إلى روح إحسان إبراهيم الخبيري رحمها الله.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8f4ea",
+  "theme_color": "#0c7a55",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

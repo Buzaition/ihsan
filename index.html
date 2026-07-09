@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إحسان | القرآن الكريم والأذكار</title>
+  <meta name="description" content="إحسان: موقع للقرآن الكريم، البحث، الأذكار، المفضلة، ومتابعة الختمة. إهداء إلى روح إحسان إبراهيم الخبيري رحمها الله." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0c7a55" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="background-pattern" aria-hidden="true"></div>
+
+  <header class="app-header">
+    <a class="brand" href="#home" data-route="home" aria-label="العودة للرئيسية">
+      <span class="brand-mark brand-image"><img src="assets/icon-192.png" alt="أيقونة إحسان" /></span>
+      <span>
+        <strong>إحسان</strong>
+        <small>قرآن • أذكار • ختمة</small>
+      </span>
+    </a>
+
+    <nav class="top-nav" aria-label="التنقل الرئيسي">
+      <a href="#home" data-route="home" class="active">الرئيسية</a>
+      <a href="#quran" data-route="quran">القرآن</a>
+      <a href="#azkar" data-route="azkar">الأذكار</a>
+      <a href="#search" data-route="search">البحث</a>
+      <a href="#prayer" data-route="prayer">الصلاة</a>
+      <a href="#tasbeeh" data-route="tasbeeh">المسبحة</a>
+      <a href="#favorites" data-route="favorites">المفضلة</a>
+      <a href="#khatmah" data-route="khatmah">الختمة</a>
+      <a href="#about" data-route="about">حول التطبيق</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="تغيير الوضع">
+      <span>☾</span>
+    </button>
+  </header>
+
+  <main>
+    <section id="home" class="view active-view">
+      <div class="hero glass-card">
+        <div class="hero-content">
+          <p class="eyebrow hero-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+          <h1>إحسان</h1>
+          <p class="hero-subtitle">مساحة هادئة لقراءة القرآن الكريم، البحث في الآيات، متابعة الأذكار، وحفظ الورد اليومي.</p>
+          <div class="dedication-ribbon">
+            <span>إهداء</span>
+            <strong>إلى روح جدتي إحسان إبراهيم الخبيري — رحمها الله</strong>
+          </div>
+          <div class="hero-actions">
+            <button class="primary-btn" id="homeStartReadingBtn" type="button">ابدأ القراءة</button>
+            <button class="ghost-btn" id="homeDailyAzkarBtn" type="button">أذكار اليوم</button>
+          </div>
+        </div>
+        <div class="hero-ornament" aria-hidden="true">
+          <div class="ornament-circle"><span>ٱقرأ</span></div>
+          <div class="floating-card top">آخر قراءة <strong id="lastReadMini">لم تبدأ بعد</strong></div>
+          <div class="floating-card bottom">المفضلة <strong id="favCountMini">0 عناصر</strong></div>
+        </div>
+      </div>
+
+      <div class="quick-search glass-card">
+        <label for="homeSearch">ابحث بسرعة</label>
+        <div class="search-row">
+          <input id="homeSearch" type="search" placeholder="اكتب آية، كلمة، سورة، أو ذكر..." autocomplete="off" />
+          <button id="homeSearchBtn" class="primary-btn">بحث</button>
+        </div>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card" data-route="quran">
+          <span>📖</span>
+          <h3>القرآن الكريم</h3>
+          <p>قائمة السور كاملة مع قراءة السورة آية آية، تفسير مختصر، وتشغيل صوتي.</p>
+        </article>
+        <article class="feature-card" data-route="search">
+          <span>🔎</span>
+          <h3>بحث شامل</h3>
+          <p>بحث في القرآن والأذكار مع تجاهل التشكيل والهمزات قدر الإمكان.</p>
+        </article>
+        <article class="feature-card" data-route="azkar">
+          <span>🤲</span>
+          <h3>كل الأذكار</h3>
+          <p>أبواب الأذكار والأدعية مع عداد تفاعلي، نسخ، مشاركة، ومفضلة.</p>
+        </article>
+        <article class="feature-card" data-route="tasbeeh">
+          <span>📿</span>
+          <h3>المسبحة الإلكترونية</h3>
+          <p>سبّح واستغفر بعداد بسيط يحفظ آخر اختيارك ويعمل بهدوء على كل الشاشات.</p>
+        </article>
+        <article class="feature-card" data-route="favorites">
+          <span>⭐</span>
+          <h3>المفضلة</h3>
+          <p>صفحة كاملة للآيات والأذكار المحفوظة مع فتح الموضع والنسخ والمشاركة.</p>
+        </article>
+        <article class="feature-card" data-route="khatmah">
+          <span>🌙</span>
+          <h3>متابعة الختمة</h3>
+          <p>سجل آخر موضع قراءة، نسبة التقدم، ووردك اليومي.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="quran" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">القرآن الكريم</p>
+          <h2>فهرس السور</h2>
+        </div>
+        <div class="section-tools">
+          <input id="surahFilter" type="search" placeholder="ابحث باسم السورة..." />
+          <select id="surahTypeFilter" aria-label="فلترة السور">
+            <option value="all">كل السور</option>
+            <option value="Meccan">مكية</option>
+            <option value="Medinan">مدنية</option>
+          </select>
+        </div>
+      </div>
+      <div id="surahGrid" class="surah-grid loading-grid"></div>
+    </section>
+
+    <section id="reader" class="view reader-view">
+      <div class="reader-toolbar glass-card">
+        <button class="ghost-btn" data-route="quran">← رجوع للفهرس</button>
+        <div class="reader-title-block">
+          <p class="eyebrow" id="surahMeta">السورة</p>
+          <h2 id="surahTitle">جاري التحميل...</h2>
+        </div>
+        <div class="reader-actions">
+          <button id="prevSurahBtn" class="ghost-btn compact-btn" type="button">السورة السابقة</button>
+          <button id="nextSurahBtn" class="ghost-btn compact-btn" type="button">السورة التالية</button>
+          <select id="reciterSelect" class="compact-select" aria-label="اختيار القارئ"></select>
+          <button id="readerModeToggle" class="ghost-btn compact-btn" type="button">قراءة متصلة</button>
+          <button id="fullscreenBtn" class="ghost-btn compact-btn" type="button">⛶ شاشة كاملة</button>
+          <button id="fontMinus" class="icon-btn" title="تصغير الخط">A-</button>
+          <button id="fontPlus" class="icon-btn" title="تكبير الخط">A+</button>
+          <button id="saveLastRead" class="primary-btn compact-btn">حفظ الموضع</button>
+        </div>
+      </div>
+      <div id="readerHint" class="reader-hint glass-card"></div>
+      <div id="ayahList" class="ayah-list"></div>
+    </section>
+
+    <section id="azkar" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">الأذكار والأدعية</p>
+          <h2>أبواب الذكر</h2>
+        </div>
+        <div class="section-tools">
+          <input id="azkarFilter" type="search" placeholder="ابحث في الأذكار..." />
+        </div>
+      </div>
+      <div id="azkarStatus" class="status-note">جاري تحميل الأذكار...</div>
+      <div id="azkarCategories" class="category-grid"></div>
+      <div id="azkarItems" class="azkar-list"></div>
+    </section>
+
+    <section id="search" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">البحث</p>
+          <h2>بحث في القرآن والأذكار</h2>
+        </div>
+      </div>
+      <div class="glass-card search-panel">
+        <div class="search-row">
+          <input id="globalSearch" type="search" placeholder="مثال: الرحمة، الصبر، آية الكرسي، أذكار النوم..." />
+          <button id="globalSearchBtn" class="primary-btn">بحث</button>
+        </div>
+        <div class="search-tabs" role="tablist">
+          <button class="active" data-search-scope="all">الكل</button>
+          <button data-search-scope="quran">القرآن</button>
+          <button data-search-scope="azkar">الأذكار</button>
+        </div>
+      </div>
+      <div id="searchResults" class="results-list"></div>
+    </section>
+
+    <section id="prayer" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">مواقيت الصلاة</p>
+          <h2>توقيت الصلاة اليوم</h2>
+        </div>
+        <div class="section-tools prayer-actions">
+          <button id="useMyLocationBtn" class="ghost-btn" type="button">استخدم موقعي الحالي</button>
+          <button id="refreshPrayerBtn" class="primary-btn" type="button">تحديث المواقيت</button>
+        </div>
+      </div>
+
+      <div class="prayer-layout">
+        <article class="prayer-hero glass-card">
+          <p class="eyebrow">الوقت الحالي</p>
+          <h3 id="currentClock">--:--:--</h3>
+          <p id="gregorianDate">جاري تحميل التاريخ...</p>
+          <div class="prayer-location-row">
+            <span id="prayerLocation">القاهرة، مصر</span>
+            <small id="prayerStatus">يتم تحميل مواقيت الصلاة...</small>
+          </div>
+        </article>
+
+        <article class="next-prayer-card glass-card">
+          <p class="eyebrow">الصلاة القادمة</p>
+          <h3 id="nextPrayerName">--</h3>
+          <strong id="nextPrayerCountdown">--:--:--</strong>
+          <p id="nextPrayerTime">جاري حساب الوقت المتبقي...</p>
+        </article>
+
+        <article class="hijri-card glass-card">
+          <p class="eyebrow">التاريخ الهجري</p>
+          <h3 id="hijriDateToday">--</h3>
+          <p id="hijriMeta">حسب تقويم أم القرى/مصدر المواقيت عند توفر الاتصال.</p>
+        </article>
+      </div>
+
+      <div id="prayerTimesGrid" class="prayer-times-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </section>
+
+    <section id="tasbeeh" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">المسبحة الإلكترونية</p>
+          <h2>سبّح بطمأنينة</h2>
+        </div>
+      </div>
+
+      <div class="tasbeeh-layout">
+        <article class="tasbeeh-card glass-card">
+          <p class="eyebrow">الذكر الحالي</p>
+          <h3 id="tasbeehPhrase">سُبْحَانَ اللَّهِ</h3>
+          <button id="tasbeehIncrement" class="tasbeeh-count" type="button" aria-label="زيادة عداد التسبيح">
+            <span id="tasbeehCount">٠</span>
+          </button>
+          <div class="tasbeeh-actions">
+            <button id="tasbeehReset" class="ghost-btn" type="button">إعادة العداد</button>
+            <button id="tasbeehSave" class="primary-btn" type="button">حفظ الذكر الحالي</button>
+          </div>
+        </article>
+
+        <article class="tasbeeh-phrases glass-card">
+          <h3>اختر ذكرًا سريعًا</h3>
+          <div class="tasbeeh-phrase-grid" id="tasbeehPhraseGrid">
+            <button class="tool-btn" data-tasbeeh-phrase="سُبْحَانَ اللَّهِ">سُبْحَانَ اللَّهِ</button>
+            <button class="tool-btn" data-tasbeeh-phrase="الْحَمْدُ لِلَّهِ">الْحَمْدُ لِلَّهِ</button>
+            <button class="tool-btn" data-tasbeeh-phrase="لَا إِلَٰهَ إِلَّا اللَّهُ">لَا إِلَٰهَ إِلَّا اللَّهُ</button>
+            <button class="tool-btn" data-tasbeeh-phrase="اللَّهُ أَكْبَرُ">اللَّهُ أَكْبَرُ</button>
+            <button class="tool-btn" data-tasbeeh-phrase="أَسْتَغْفِرُ اللَّهَ">أَسْتَغْفِرُ اللَّهَ</button>
+            <button class="tool-btn" data-tasbeeh-phrase="لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ">لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ</button>
+          </div>
+          <p>يمكنك الضغط على الدائرة الكبيرة للعد، وتغيير الذكر في أي وقت. يتم حفظ آخر ذكر وعدده على نفس الجهاز.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="favorites" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">المحفوظات</p>
+          <h2>المفضلة</h2>
+        </div>
+        <div class="section-tools favorites-tools">
+          <select id="favoriteTypeFilter" aria-label="فلترة المفضلة">
+            <option value="all">كل العناصر</option>
+            <option value="ayah">الآيات</option>
+            <option value="zekr">الأذكار</option>
+          </select>
+          <button id="clearFavorites" class="ghost-btn danger-btn" type="button">حذف كل المفضلة</button>
+        </div>
+      </div>
+      <div id="favoritesList" class="favorites-list"></div>
+    </section>
+
+    <section id="khatmah" class="view">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">متابعة الورد</p>
+          <h2>الختمة والتقدم</h2>
+        </div>
+      </div>
+      <div class="khatmah-layout">
+        <div class="glass-card progress-card">
+          <div class="progress-ring" id="progressRing" style="--progress:0%">
+            <strong id="progressText">0%</strong>
+          </div>
+          <h3>تقدم الختمة</h3>
+          <p id="khatmahSummary">ابدأ بتحديد آخر سورة وصلت لها.</p>
+        </div>
+        <form class="glass-card khatmah-form" id="khatmahForm">
+          <label>آخر سورة قرأتها</label>
+          <select id="khatmahSurah"></select>
+          <label>آخر آية</label>
+          <input id="khatmahAyah" type="number" min="1" value="1" />
+          <label>هدف الختمة بالأيام</label>
+          <select id="khatmahDays">
+            <option value="7">7 أيام</option>
+            <option value="15">15 يوم</option>
+            <option value="30" selected>30 يوم</option>
+            <option value="60">60 يوم</option>
+          </select>
+          <button class="primary-btn" type="submit">حفظ التقدم</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="about" class="view">
+      <div class="about-page glass-card">
+        <p class="eyebrow">حول التطبيق</p>
+        <h2>إحسان</h2>
+        <p class="about-lead">
+          تطبيق ويب هادئ لقراءة القرآن الكريم، البحث في الآيات، متابعة الأذكار، استخدام المسبحة الإلكترونية، متابعة مواقيت الصلاة، وحفظ موضع القراءة بسهولة.
+        </p>
+
+        <div class="about-grid">
+          <article class="about-card">
+            <span>👨‍💻</span>
+            <h3>المطور</h3>
+            <p><strong>أبوزيد أبوالسعد سعد</strong></p>
+          </article>
+          <article class="about-card">
+            <span>🌿</span>
+            <h3>سبب التطوير</h3>
+            <p>تم تطوير إحسان ليكون مساحة نافعة وبسيطة تجمع القرآن الكريم، الأذكار، المسبحة الإلكترونية، مواقيت الصلاة، البحث، والختمة في مكان واحد مناسب للاستخدام اليومي.</p>
+          </article>
+          <article class="about-card">
+            <span>🤲</span>
+            <h3>دعاء وإهداء</h3>
+            <p>هذا العمل إهداء وصدقة جارية إلى روح جدتي <strong>إحسان إبراهيم الخبيري</strong>، رحمها الله رحمة واسعة.</p>
+          </article>
+        </div>
+
+        <div class="dua-box">
+          <span>اللهم</span>
+          <p>اغفر لها وارحمها، وعافها واعفُ عنها، وأكرم نُزلها، ووسع مُدخلها، واجعل قبرها روضةً من رياض الجنة.</p>
+        </div>
+
+        <div class="usage-box">
+          <h3>كيفية استخدام الموقع</h3>
+          <ol>
+            <li>من الرئيسية اضغط <strong>ابدأ القراءة</strong> للعودة لآخر موضع محفوظ أو فتح فهرس السور.</li>
+            <li>افتح أي سورة، ثم اختر قراءة بطاقات أو قراءة متصلة، ويمكنك تكبير الخط أو تشغيل الصوت.</li>
+            <li>اضغط على الآية في القراءة المتصلة لعرض التفسير، أو استخدم زر التفسير في بطاقات الآيات.</li>
+            <li>من قسم الأذكار اختر الباب المطلوب، وستظهر أذكاره مباشرة تحت مكان الاختيار بدون الرجوع لأعلى أو النزول لآخر الصفحة.</li>
+            <li>في القراءة المتصلة اضغط على الآية ليظهر تفسيرها أسفلها مباشرة مع تظليل بسيط للآية المفتوحة.</li>
+            <li>استخدم صفحة مواقيت الصلاة لمعرفة الصلاة القادمة، الوقت المتبقي عليها، التاريخ الهجري، والساعة الحالية.</li>
+            <li>استخدم قسم المسبحة الإلكترونية للعد السريع وحفظ آخر ذكر وعدده على جهازك.</li>
+          </ol>
+        </div>
+        <button class="primary-btn" data-route="home">العودة للرئيسية</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <template id="skeletonCard">
+    <div class="skeleton-card"></div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
