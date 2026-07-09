@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://ihsan-quran.vercel.app/sitemap.xml

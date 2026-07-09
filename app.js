@@ -43,6 +43,11 @@ const fallbackAzkar = [
   }
 ];
 
+if (!localStorage.getItem("ihsan_reader_mode_default_v2")) {
+  localStorage.setItem(STORAGE.readerMode, "continuous");
+  localStorage.setItem("ihsan_reader_mode_default_v2", "1");
+}
+
 let state = {
   route: "home",
   surahs: [],
@@ -54,7 +59,7 @@ let state = {
   searchScope: "all",
   favorites: readJSON(STORAGE.favorites, []),
   fontSize: Number(localStorage.getItem(STORAGE.font)) || 1.85,
-  readerMode: localStorage.getItem(STORAGE.readerMode) || "cards",
+  readerMode: localStorage.getItem(STORAGE.readerMode) || "continuous",
   reciter: localStorage.getItem(STORAGE.reciter) || "ar.husary",
   activeAudio: null,
   audioSession: 0,
@@ -70,10 +75,38 @@ let state = {
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
+function syncHeaderMode(route = state.route) {
+  const header = document.querySelector(".app-header");
+  if (!header) return;
+
+  // Requested behavior: header is fixed on the home page only,
+  // and scrolls normally on all other pages.
+  if (route === "home") {
+    header.style.setProperty("position", "fixed", "important");
+    header.style.setProperty("top", "max(8px, env(safe-area-inset-top))", "important");
+    header.style.setProperty("left", "0", "important");
+    header.style.setProperty("right", "0", "important");
+    header.style.setProperty("bottom", "auto", "important");
+    header.style.setProperty("transform", "none", "important");
+    header.style.setProperty("margin", "0 auto", "important");
+    header.style.setProperty("z-index", "99999", "important");
+  } else {
+    header.style.setProperty("position", "relative", "important");
+    header.style.setProperty("top", "auto", "important");
+    header.style.setProperty("left", "auto", "important");
+    header.style.setProperty("right", "auto", "important");
+    header.style.setProperty("bottom", "auto", "important");
+    header.style.setProperty("transform", "none", "important");
+    header.style.setProperty("margin", "16px auto 0", "important");
+    header.style.setProperty("z-index", "70", "important");
+  }
+}
+
 init();
 
 async function init() {
   applyTheme();
+  syncHeaderMode((location.hash || "#home").replace("#", "") || "home");
   applyFontSize();
   populateReciters();
   bindEvents();
@@ -300,6 +333,7 @@ function navigate(route, updateHash = true) {
   state.route = safeRoute;
   document.body.dataset.route = safeRoute;
   document.body.classList.toggle("is-home", safeRoute === "home");
+  syncHeaderMode(safeRoute);
   $$(".view").forEach(view => view.classList.remove("active-view"));
   $("#" + safeRoute).classList.add("active-view");
   $$(".top-nav a").forEach(link => link.classList.toggle("active", link.dataset.route === safeRoute));

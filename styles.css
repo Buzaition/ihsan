@@ -3568,3 +3568,189 @@ body:not(.is-home) main {
     font-size: .7rem;
   }
 }
+
+/* V16 final requested fixes: home header scrolls, compact mobile Quran list, default continuous reader, SEO-friendly layout polish */
+body.is-home > .app-header {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  margin: 16px auto 0 !important;
+}
+
+body:not(.is-home) > .app-header {
+  position: fixed !important;
+  top: max(8px, env(safe-area-inset-top)) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: min(1180px, calc(100% - 24px)) !important;
+  margin: 0 auto !important;
+  z-index: 99999 !important;
+}
+
+/* keep the home header from behaving as sticky on every responsive breakpoint */
+body.is-home > .app-header.app-header {
+  position: relative !important;
+}
+
+body.is-home main {
+  margin-top: 22px !important;
+}
+
+/* Short ListView for Surahs on phones/tablets */
+@media (max-width: 760px) {
+  #quran .section-head {
+    margin: 8px 0 10px !important;
+    gap: 10px !important;
+  }
+
+  #quran .section-head h2 {
+    font-size: clamp(1.7rem, 7vw, 2.3rem) !important;
+  }
+
+  #quran .section-tools {
+    gap: 8px !important;
+  }
+
+  #surahGrid.surah-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  #surahGrid .surah-card {
+    min-height: 58px !important;
+    padding: 9px 12px !important;
+    border-radius: 18px !important;
+    display: grid !important;
+    grid-template-columns: minmax(88px, auto) 1fr auto !important;
+    align-items: center !important;
+    column-gap: 10px !important;
+  }
+
+  #surahGrid .surah-card::after {
+    position: static !important;
+    content: attr(data-number) !important;
+    grid-column: 3 !important;
+    grid-row: 1 / span 2 !important;
+    font-size: .95rem !important;
+    width: 34px !important;
+    height: 34px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 12px !important;
+    color: var(--primary-dark) !important;
+    background: rgba(12, 122, 85, .08) !important;
+    font-weight: 800 !important;
+  }
+
+  #surahGrid .surah-card h3 {
+    margin: 0 !important;
+    font-size: 1.12rem !important;
+    line-height: 1.15 !important;
+    grid-column: 1 !important;
+  }
+
+  #surahGrid .surah-card p {
+    margin: 0 !important;
+    font-size: .72rem !important;
+    line-height: 1.35 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    grid-column: 2 !important;
+    color: var(--muted) !important;
+  }
+
+  #surahGrid .surah-meta {
+    margin: 0 !important;
+    grid-column: 1 / 3 !important;
+    gap: 5px !important;
+  }
+
+  #surahGrid .surah-meta .badge {
+    padding: 3px 7px !important;
+    font-size: .66rem !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #surahGrid .surah-card {
+    grid-template-columns: minmax(78px, auto) minmax(0, 1fr) 32px !important;
+    min-height: 54px !important;
+    padding: 8px 10px !important;
+  }
+
+  #surahGrid .surah-card h3 {
+    font-size: 1rem !important;
+  }
+
+  #surahGrid .surah-card p {
+    font-size: .68rem !important;
+  }
+}
+
+
+/* V17 requested reverse header behavior: fixed on home, scrolling on all other pages */
+body.is-home > .app-header,
+body.is-home .app-header {
+  position: fixed !important;
+  top: max(8px, env(safe-area-inset-top)) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: min(1180px, calc(100% - 24px)) !important;
+  margin: 0 auto !important;
+  z-index: 99999 !important;
+}
+
+body:not(.is-home) > .app-header,
+body:not(.is-home) .app-header {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: min(1180px, calc(100% - 24px)) !important;
+  margin: 16px auto 0 !important;
+  z-index: 70 !important;
+}
+
+body.is-home main {
+  margin-top: 112px !important;
+}
+
+body:not(.is-home) main {
+  margin-top: 22px !important;
+}
+
+@media (max-width: 1024px) {
+  body.is-home > .app-header,
+  body.is-home .app-header {
+    top: max(8px, env(safe-area-inset-top)) !important;
+    width: min(100% - 18px, 1180px) !important;
+    margin: 0 auto !important;
+  }
+
+  body:not(.is-home) > .app-header,
+  body:not(.is-home) .app-header {
+    position: relative !important;
+    top: auto !important;
+    width: min(100% - 18px, 1180px) !important;
+    margin: 8px auto 0 !important;
+  }
+
+  body.is-home main {
+    margin-top: 92px !important;
+  }
+
+  body:not(.is-home) main {
+    margin-top: 12px !important;
+  }
+}
